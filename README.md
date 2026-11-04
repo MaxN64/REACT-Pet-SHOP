@@ -1,200 +1,94 @@
+# React Pet Shop — Full-Stack Storefront Demo
 
+**A product-catalog and shopping-cart application built with React, Redux Toolkit, Express, Sequelize and SQLite.**
 
-PROJECT-REACT-PET-SHOP
+**Language:** English · [Deutsch](README.de.md) · [Previous technical notes](README.legacy.md)
 
-Monorepo for a pet products online store: React (Create React App) frontend and Node.js/Express + Sequelize + SQLite backend.
+**Stack:** React 19 · Create React App · Redux Toolkit · React Router · Axios · Node.js · Express · Sequelize · SQLite
 
-PROJECT-REACT-PET-SHOP/
-├─ Pet-Shop-Frontend/   # React client application
-└─ Pet-Shop-Backend/    # REST API (Express + Sequelize + SQLite)
+> **Status:** Local full-stack portfolio demo. Catalog and cart flows are implemented; the order and sale endpoints contain demonstration handlers rather than real payment/order fulfillment. The included SQLite database should be reviewed for non-demo data before redistributing it.
 
-1) Frontend — Pet-Shop-Frontend
-Tech stack & versions
-React: ^19.1.0
-react-dom: ^19.1.0
-react-scripts (CRA): 5.0.1
-react-router-dom: ^6.30.1
-@reduxjs/toolkit: ^2.8.2
-react-redux: ^9.2.0
-axios: ^1.9.0
-react-hook-form: ^7.56.4
+## Screenshots
 
+Existing images from the repository, linked using paths that also work after repository renaming:
 
+![Pet Shop interface — preview 1](Pet-Shop-Frontend/public/docs/190815.png)
 
-Scripts
-Run from Pet-Shop-Frontend:
+![Pet Shop interface — preview 2](Pet-Shop-Frontend/public/docs/190931.png)
 
-npm start       # dev server (CRA), default: http://localhost:3000
-npm run build   # production build
-npm test        # tests (CRA)
-npm run eject   # CRA eject (irreversible)
+![Pet Shop interface — preview 3](Pet-Shop-Frontend/public/docs/191020.png)
 
-API base URL
-The base API URL is hard-coded as http://localhost:3333 in:
-src/features/products/productsAPI.js
-src/features/categories/categoriesAPI.js
+Additional original screenshots are in [`Pet-Shop-Frontend/public/docs/`](Pet-Shop-Frontend/public/docs/).
 
-The frontend does not use env variables for API URL. If you change the backend host/port, update these two files accordingly.
+## Core functionality
 
-SPA routes
+- Browse the catalog and product categories.
+- View product details and sale-priced items.
+- Add products to the cart, increase/decrease quantities, remove items and calculate totals.
+- Fetch catalog data from an Express REST API backed by Sequelize and SQLite.
+- Navigate the storefront using React Router.
 
-Defined in src/App.jsx:
+## Architecture
 
-/                 — HomePage
-/categories       — CategoriesPage
-/categories/:id   — CategoryProductsPage
-/products         — AllProductsPage
-/sales            — SalesPage
-/product/:id      — ProductDetailPage
-/cart             — CartPage
-*                 — NotFoundPage
+```mermaid
+flowchart LR
+    A[Browser] --> B[React storefront]
+    B --> C[Redux Toolkit state]
+    B -->|HTTP / Axios| D[Express API :3333]
+    D --> E[Sequelize ORM]
+    E --> F[(SQLite database)]
+    D --> G[Product and category images]
+```
 
-State management (Redux)
-Store config: src/app/store.js
+| Component | Location |
+| --- | --- |
+| Frontend / React pages | `Pet-Shop-Frontend/src/pages/` |
+| Redux store and feature slices | `Pet-Shop-Frontend/src/app/`, `src/features/` inside frontend |
+| API server | `Pet-Shop-Backend/index.js` |
+| Routes | `Pet-Shop-Backend/routes/` |
+| Data models | `Pet-Shop-Backend/database/models/` |
 
-Slices:
-products — src/features/products/productsSlice.js
-thunks: fetchAllProducts, fetchDiscountedProducts, fetchProductById
-API client: src/features/products/productsAPI.js
-categories — src/features/categories/categoriesSlice.js
-thunks: fetchCategories, fetchProductsByCategory
-API client: src/features/categories/categoriesAPI.js
-cart — src/features/cart/cartSlice.js
-actions: addItemToCart, removeItemFromCart, increaseQuantity, decreaseQuantity, clearCart
-state shape: items[], totalQuantity, totalAmount
+## Run locally
 
-Key components & pages
-src/components/Header/Header.jsx — logo, navigation, cart badge (uses /public/assets/...)
-src/components/Footer/Footer.jsx
-src/components/ProductCard/ProductCard.jsx
-src/components/CategoriesSection/CategoriesSection.jsx
+**Requirements:** Node.js, npm; dependencies for both applications. Start each process in a separate terminal from the repository root.
 
-Pages: HomePage, CategoriesPage, CategoryProductsPage, AllProductsPage, SalesPage, ProductDetailPage, CartPage, NotFoundPage
+**Terminal 1 — API:**
 
-![Превью проекта](https://github.com/MaxN64/PROJECT-REACT-Pet-SHOP/blob/master/Pet-Shop-Frontend/public/docs/190815.png)
-
-![Превью проекта](https://github.com/MaxN64/PROJECT-REACT-Pet-SHOP/blob/master/Pet-Shop-Frontend/public/docs/190834.png)
-
-![Превью проекта](https://github.com/MaxN64/PROJECT-REACT-Pet-SHOP/blob/master/Pet-Shop-Frontend/public/docs/190931.png)
-
-![Превью проекта](https://github.com/MaxN64/PROJECT-REACT-Pet-SHOP/blob/master/Pet-Shop-Frontend/public/docs/190953.png)
-
-![Превью проекта](https://github.com/MaxN64/PROJECT-REACT-Pet-SHOP/blob/master/Pet-Shop-Frontend/public/docs/191020.png)
-
-![Превью проекта](https://github.com/MaxN64/PROJECT-REACT-Pet-SHOP/blob/master/Pet-Shop-Frontend/public/docs/191035.png)
-
-![Превью проекта](https://github.com/MaxN64/PROJECT-REACT-Pet-SHOP/blob/master/Pet-Shop-Frontend/public/docs/191052.png)
-
-![Превью проекта](https://github.com/MaxN64/PROJECT-REACT-Pet-SHOP/blob/master/Pet-Shop-Frontend/public/docs/191139.png)
-
-
-
-Public assets
-public/index.html
-public/assets/* (icons, logo, images)
-2) Backend — Pet-Shop-Backend
-Tech stack & versions
-
-Node.js/Express
-Sequelize: ^6.23.2
-SQLite3: ^5.1.1
-cors: ^2.8.5
-Dev: nodemon ^2.0.20
-package.json (backend):
-
-{
-  "name": "project_backend",
-  "version": "1.0.0",
-  "author": "astemir",
-  "license": "ISC",
-  "main": "index.js",
-  "scripts": {
-    "dev": "nodemon index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "dependencies": {
-    "cors": "^2.8.5",
-    "express": "^4.18.1",
-    "sequelize": "^6.23.2",
-    "sqlite3": "^5.1.1"
-  },
-  "devDependencies": {
-    "nodemon": "^2.0.20"
-  }
-}
-
-Run locally
-
-From Pet-Shop-Backend:
-
-npm install
-npm run dev        # starts nodemon
-# server listens on http://localhost:3333
-
-
-Port: 3333 (hard-coded in index.js)
-CORS: open to all origins (origin: '*')
-Static: app.use(express.static('public')) → everything under public/ is served as static
-Database
-SQLite file: Pet-Shop-Backend/database.sqlite
-Connection config: database/database.js
-new Sequelize({ dialect: 'sqlite', storage: './database.sqlite' })
-Models (Sequelize):
-database/models/category.js
-category: { id (PK, autoincrement), title TEXT, image TEXT }
-database/models/product.js
-
-product: {
-  id (PK, autoincrement),
-  title TEXT,
-  price INTEGER,
-  discont_price INTEGER,   // may be null
-  description TEXT,
-  image TEXT
-}
-
-
-Association: Category.hasMany(Product) (see index.js)
-Sync: sequelize.sync() runs on startup
-Static files (public/)
-public/category_img/ — category images
-public/product_img/ — product images
-Static URLs example:
-http://localhost:3333/category_img/<file>
-http://localhost:3333/product_img/<file>
-(public/ is the static root.)
-API routes
-Mounted in index.js:
-app.use('/categories', categories);
-app.use('/products', products);
-app.use('/sale', sale);
-app.use('/order', order);
-/categories (see routes/categories.js)
-GET /categories/all — returns all categories (Category.findAll())
-GET /categories/:id — returns products by category
-Response shape: { category, data: Product[] }
-If empty: { status: 'ERR', message: 'empty category' }
-/products (see routes/products.js)
-GET /products/all — returns all products (Product.findAll())
-GET /products/:id — returns product by id (the frontend uses this endpoint)
-GET /products/add/:title/:price/:discont_price/:description — quick demo insert via URL params (for debugging/demo)
-Note: Even though the file preview might look truncated, the handler for GET /products/:id is present and used by the frontend.
-/sale (see routes/sale.js)
-GET /sale/send — stub { }
-POST /sale/send — stub { status: 'OK', message: 'request processed' }
-/order (see routes/order.js)
-GET /order/send — stub { }
-POST /order/send — stub { status: 'OK', message: 'request processed' }
-
-Local development (Frontend + Backend)
-
-Start the backend:
+```bash
 cd Pet-Shop-Backend
 npm install
-npm run dev            # http://localhost:3333
+npm run dev
+```
 
+Backend: [http://localhost:3333](http://localhost:3333).
 
-Start the frontend:
-cd ../Pet-Shop-Frontend
+**Terminal 2 — storefront:**
+
+```bash
+cd Pet-Shop-Frontend
 npm install
-npm start              # http://localhost:3000
+npm start
+```
+
+Frontend: [http://localhost:3000](http://localhost:3000). The frontend API URL is hardcoded to `http://localhost:3333` in the product/category API modules; changing ports requires a separate code/configuration change.
+
+**Note:** These commands reflect the existing `package.json` scripts and were not executed for this README update.
+
+## Engineering notes and limitations
+
+- The backend uses Sequelize models and synchronizes the SQLite database at startup.
+- Product/category REST endpoints support storefront browsing; the cart is managed on the frontend.
+- Order and sale endpoints are mock handlers. There is no real checkout, payment provider or user-account flow.
+- Backend CORS is configured permissively for local demonstration; the API is not hardened for public deployment.
+- No CI workflow or substantive backend test suite was identified. The backend `npm test` script is a placeholder.
+- The tracked `Pet-Shop-Backend/database.sqlite` file requires a data/privacy review before presenting it as distributable demo data.
+
+## Suggested reviewer walkthrough
+
+Browse categories → inspect a product → add it to the cart → update quantity → inspect the matching Express routes and Redux state transitions.
+
+## Documentation
+
+Original detailed notes: [`README.legacy.md`](README.legacy.md). Module documentation: [`Pet-Shop-Frontend/README.md`](Pet-Shop-Frontend/README.md) and [`Pet-Shop-Backend/README.md`](Pet-Shop-Backend/README.md).
+
+*Portfolio focus: Full-Stack JavaScript, REST API integration, state management and relational persistence.*
